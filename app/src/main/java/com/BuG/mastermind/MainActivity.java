@@ -10,84 +10,110 @@ import java.util.Random;
 
 
 public class MainActivity extends AppCompatActivity {
-    public boolean Status; //for Future visions.
+    private Button button;
     Random random = new Random();
     private EditText guess;
     private TextView res;
     private TextView ResultText = findViewById(R.id.ResultText);
     private int randomNumber;
-    private int checkNo;
+    private String checkNo,correctNo;
     private int score;
-    private Button button;
-    private boolean pressed = false;
-
-    public void initiate(){
-        score = 0;
-        randomNumber = random.nextInt(1000)+1000;
-        ResultText.setText("");
-    }
-    public void getInput(){
-        while(!pressed){}
-        checkNo = Integer.parseInt(guess.getText().toString());
-        pressed = false;
-        if(checkNo<1000 || checkNo>9999)
-            getInput();
-    }
-    private void getRes(){
-        String result = "";
-        String temp = Integer.toString(checkNo);
-        String anstemp = Integer.toString(randomNumber);
-        for(int i=0;i<temp.length();i++){
-            for(int j=0;j<anstemp.length();j++){
-                if(temp.charAt(i)==anstemp.charAt(j)){
-                  //  temp.remove(i);
-                 //   anstemp.remove(j);
-                    if(i==j) {
-                        result += "X";
-                    }else
-                        result += "0";
-                }
-
-            }
-        }
-        res.setText(result);
-    }
-    private void getGuessAndRes(){
-        if(score==1)
-            guess = findViewById(R.id.try1);
-            res = findViewById(R.id.res1);
-    }
-    public void Game( View view) {
-        getGuessAndRes();
-        guess.setEnabled(true);
-        getInput();
-        guess.setEnabled(false);
-
-        if (checkNo == randomNumber) {
-            ResultText.setText(("Bulls Eye! You Got it.\n Score : " + score));
-            initiate();
-            Game(view);
-        }
-        getRes();
-        score++;
-        if (score > 10) {
-            ResultText.setText("Result : Unlucky Day Boi!");
-            Game(view);
-        }
-    }
-
 
         @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         button = findViewById(R.id.button);
+        button.setText("Submit");
         initiate();
-            button.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    pressed = true;
-                }
-            });
     }
-
+    private void initiate(){
+        score = 1;
+        randomNumber = random.nextInt(10000) + 10000;
+        correctNo = Integer.toString(randomNumber);
+        guess = findViewById(R.id.try1);
+        res = findViewById(R.id.res1);
+    }
+    private void GameLost(){
+            button.setText("START Again");
+            ResultText.setText("Result: Sorry! Unlucky Day");
+            initiate();
+    }
+    private void GameWon(){
+            button.setText("START Again");
+            score=10-score+1;
+            ResultText.setText("Result: Bulls Eye! | Score: " + score);
+            initiate();
+    }
+    private char[] resultTrial = {' ' , ' ' , ' ' , ' '};
+    private void UpdateRes(boolean RESET){
+            if(!RESET){
+                checkNo = guess.getText().toString();
+                if(checkNo == correctNo)
+                    res.setText("X X X X");
+                else{
+                    for(int i=0;i<4;i++)
+                        for(int j=0;i<4;i++) {
+                            if(checkNo.charAt(i) == correctNo.charAt(j)) {
+                                if (i == j)
+                                    resultTrial[i] = 'X';
+                                else
+                                    resultTrial[j] = '0';
+                                correctNo = correctNo.substring(0, j) + 'H' + correctNo.substring(j + 1);
+                            }
+                        }
+                    res.setText(resultTrial[0]+ " " + resultTrial[1] + " " + resultTrial[2] + " " + resultTrial[3]);
+                }
+            }
+    }
+    private void updateGuess(){
+            if(guess.getId() == R.id.try1){
+                guess = findViewById(R.id.try2);
+                res = findViewById(R.id.res2);
+            }
+            else if(guess.getId() == R.id.try2){
+                guess = findViewById(R.id.try3);
+                res = findViewById(R.id.res3);
+            }
+            else if(guess.getId() == R.id.try3){
+                guess = findViewById(R.id.try4);
+                res = findViewById(R.id.res4);
+            }
+            else if(guess.getId() == R.id.try4){
+                guess = findViewById(R.id.try5);
+                res = findViewById(R.id.res5);
+            }
+            else if(guess.getId() == R.id.try5){
+                guess = findViewById(R.id.try6);
+                res = findViewById(R.id.res6);
+            }
+            else if(guess.getId() == R.id.try6){
+                guess = findViewById(R.id.try7);
+                res = findViewById(R.id.res7);
+            }
+            else if(guess.getId() == R.id.try7){
+                guess = findViewById(R.id.try8);
+                res = findViewById(R.id.res8);
+            }
+            else if(guess.getId() == R.id.try8){
+                guess = findViewById(R.id.try9);
+                res = findViewById(R.id.res9);
+            }
+            else if(guess.getId() == R.id.try9){
+                guess = findViewById(R.id.try10);
+                res = findViewById(R.id.res10);
+            }
+    }
+    public void Game(View v){
+            guess.setEnabled(false);
+            UpdateRes(false);
+            if(res.getText().toString() == "X X X X")
+                GameWon();
+            score++;
+            if(score>10) {
+                GameLost();
+            }
+            updateGuess();
+            guess.setEnabled(true);
+    }
 }
