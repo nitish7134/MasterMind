@@ -7,64 +7,99 @@ import android.widget.EditText;
 import android.widget.Button;
 import android.widget.TextView;
 import java.util.Random;
-
+import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
     private Button button;
     Random random = new Random();
     private EditText guess;
     private TextView res;
-    private TextView ResultText = findViewById(R.id.ResultText);
+    private TextView ResultText;
     private int randomNumber;
     private String checkNo,correctNo;
     private int score;
+    private TextView Debug;
+    private Button StartButton,NewButton;
+    private void initiate(){
+        button.setText("Submit");
+        ResultText.setText("Result: ");
+        score = 1;
+        randomNumber = random.nextInt(1000)+1000;
+        correctNo = Integer.toString(randomNumber);
+        guess = findViewById(R.id.try1);
+        res = findViewById(R.id.res1);
+        Debug = findViewById(R.id.DEBUG);
+        Debug.setText(correctNo);
+    }
 
-        @Override
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         button = findViewById(R.id.button);
-        button.setText("Submit");
+        ResultText = findViewById(R.id.ResultText);
+        StartButton = findViewById(R.id.StartButton);
+        guess = findViewById(R.id.try1);
+        guess.setHint("Enter Here");
+        NewButton = findViewById(R.id.StartAgain);
         initiate();
     }
-    private void initiate(){
-        score = 1;
-        randomNumber = random.nextInt(10000) + 10000;
-        correctNo = Integer.toString(randomNumber);
-        guess = findViewById(R.id.try1);
-        res = findViewById(R.id.res1);
-    }
+
     private void GameLost(){
-            button.setText("START Again");
             ResultText.setText("Result: Sorry! Unlucky Day");
-            initiate();
+            button.setVisibility(View.INVISIBLE);
+            NewButton.setVisibility(View.VISIBLE);
     }
     private void GameWon(){
-            button.setText("START Again");
-            score=10-score+1;
-            ResultText.setText("Result: Bulls Eye! | Score: " + score);
-            initiate();
+            ResultText.setText("Result: Bulls Eye! | Score: " + (101-score));
+            button.setVisibility(View.INVISIBLE);
+            NewButton.setVisibility(View.VISIBLE);
     }
-    private char[] resultTrial = {' ' , ' ' , ' ' , ' '};
-    private void UpdateRes(boolean RESET){
-            if(!RESET){
-                checkNo = guess.getText().toString();
-                if(checkNo == correctNo)
-                    res.setText("X X X X");
-                else{
-                    for(int i=0;i<4;i++)
-                        for(int j=0;i<4;i++) {
-                            if(checkNo.charAt(i) == correctNo.charAt(j)) {
-                                if (i == j)
-                                    resultTrial[i] = 'X';
-                                else
-                                    resultTrial[j] = '0';
-                                correctNo = correctNo.substring(0, j) + 'H' + correctNo.substring(j + 1);
-                            }
+    String temp;
+
+    public void UpdateRes(){
+         char[] resultTrial = {' ' , ' ' , ' ' , ' '};
+        checkNo = res.getText().toString();
+        if(checkNo.compareTo(correctNo) == 0){
+            GameWon();
+            return;
+        }
+        String ResultT ="";
+        temp = correctNo;
+        checkNo = guess.getText().toString();
+        //boolean flagWTF = false;
+        int s = checkNo.length();
+        Log.d("WTF LENGTH","" + s);
+        if(s!=4){
+            Log.d("Which wtf","NOT 4");
+            res.setText("WTF YOU Entering");
+            return;
+        }
+            boolean flag =true;
+                for (int i = 0; i < 4; i++) {
+                    for (int j = 0; j < 4; j++) {
+                        Log.d("internal", "Hi" + i + ':' + j);
+                        if (checkNo.charAt(i) == correctNo.charAt(j)) {
+                            correctNo = correctNo.substring(0, j) + '|' + correctNo.substring(j + 1);  //'|' is anything arbitrary;
+                            flag = false;
+                            if (i == j)
+                                resultTrial[i] = 'X';
+                            else
+                                resultTrial[i] = '0';
+                            Log.d("internal", "found at" + i + ':' + j);
+                            break;
                         }
-                    res.setText(resultTrial[0]+ " " + resultTrial[1] + " " + resultTrial[2] + " " + resultTrial[3]);
+                    }
                 }
-            }
+                if (flag)
+                    ResultT = "Sed Lyf!";
+                else
+                    ResultT = resultTrial[0] + " " + resultTrial[1] + ' ' + resultTrial[2] + ' ' + resultTrial[3];
+
+                Log.d("HI",ResultT + "  : " + resultTrial[0] + " " + resultTrial[1]);
+                Log.d("WTF",correctNo + "  " + randomNumber + " " + checkNo);
+                res.setText("Result: " + ResultT);
+        correctNo = temp;
     }
     private void updateGuess(){
             if(guess.getId() == R.id.try1){
@@ -102,15 +137,35 @@ public class MainActivity extends AppCompatActivity {
             else if(guess.getId() == R.id.try9){
                 guess = findViewById(R.id.try10);
                 res = findViewById(R.id.res10);
+            }else if(guess.getId() == R.id.try10){
+                guess = findViewById(R.id.try1);
+                res = findViewById(R.id.res1);
             }
+        guess.setVisibility(View.VISIBLE);
+        guess.setHint("Enter Here");
+        guess.setText("");
+
+    }
+    public void OnStarClick(View V){
+        button.setVisibility(View.VISIBLE);
+        StartButton.setVisibility(View.INVISIBLE);
+    }
+    private void ResetEverything(){
+
+
+    }
+    public void StartNew(View V){
+        ResetEverything();
+        initiate();
+        button.setVisibility(View.VISIBLE);
+        NewButton.setVisibility(View.INVISIBLE);
     }
     public void Game(View v){
+                                         Debug.setText(correctNo);
             guess.setEnabled(false);
-            UpdateRes(false);
-            if(res.getText().toString() == "X X X X")
-                GameWon();
+            UpdateRes();
             score++;
-            if(score>10) {
+            if(score>100) {
                 GameLost();
             }
             updateGuess();
